@@ -33,7 +33,7 @@ def main(argv=None):
     ap.add_argument("input", help="input PDF path")
     ap.add_argument("--from", dest="src", default="en", help="source language code")
     ap.add_argument("--to", dest="tgt", default="no", help="target language code")
-    ap.add_argument("--model", default="gemma2:9b", help="Ollama model name")
+    ap.add_argument("--model", default="gemma2:2b", help="Ollama model name")
     ap.add_argument("--pages", default=None, help="e.g. 1-5 or 3 (1-based)")
     ap.add_argument("--skip-translate", action="store_true",
                     help="reuse an existing translated JSON / cache")

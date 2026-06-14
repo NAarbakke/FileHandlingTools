@@ -18,13 +18,13 @@ pip install -r requirements.txt
 Install Ollama (https://ollama.com) and pull a multilingual model:
 
 ```powershell
-ollama pull gemma2:9b      # default; gemma2:2b is lighter, aya-expanse:8b is translation-focused
+ollama pull gemma2:2b      # default (small, fits low-VRAM/CPU); gemma2:9b/aya-expanse:8b give better quality if your GPU fits them
 ```
 
 ## Usage
 
 ```powershell
-python -m pdftranslate input.pdf --to no --model gemma2:9b
+python -m pdftranslate input.pdf --to no --model gemma2:2b
 ```
 
 Output: `output/<name>.no.pdf` plus before/after QA images in `output/qa/`.
@@ -35,7 +35,7 @@ Useful flags:
 |------|---------|
 | `--from en` | source language (default `en`) |
 | `--to no` | target language (default `no`) |
-| `--model gemma2:9b` | Ollama model |
+| `--model gemma2:2b` | Ollama model (default `gemma2:2b`) |
 | `--pages 1-5` | process only these pages (1-based); others copied unchanged |
 | `--skip-translate` | reuse the cached translation for a fast rebuild |
 | `--no-qa` | skip the QA image render |

@@ -21,7 +21,7 @@ SYSTEM_PROMPT = (
 class OllamaTranslator:
     """Callable translator backed by a local Ollama chat model."""
 
-    def __init__(self, model="gemma2:9b", url=OLLAMA_URL, src="en", tgt="no", temperature=0.2, timeout=300):
+    def __init__(self, model="gemma2:2b", url=OLLAMA_URL, src="en", tgt="no", temperature=0.2, timeout=300):
         self.model = model
         self.url = url
         self.timeout = timeout
@@ -79,7 +79,7 @@ def translate_document(doc, translator, cache_dir=None, progress=None):
     return doc
 
 
-def run(blocks_path, out_path, *, model="gemma2:9b", cache_dir=None, translator=None, progress=None):
+def run(blocks_path, out_path, *, model="gemma2:2b", cache_dir=None, translator=None, progress=None):
     doc = json.loads(Path(blocks_path).read_text(encoding="utf-8"))
     if translator is None:
         translator = OllamaTranslator(model=model, src=doc["source_lang"], tgt=doc["target_lang"])
