@@ -1,8 +1,45 @@
 import json
 
-from pdftranslate.extract import extract_document, run
+from pdftranslate.extract import _join_lines, extract_document, run
 
 REQUIRED_BLOCK_KEYS = {"id", "bbox", "text", "size", "color", "skip", "skip_reason"}
+
+
+def _ln(text, x1):
+    """A line record as produced by PyMuPDF's dict extraction (only x1 matters here)."""
+    return {"text": text, "bbox": [0.0, 0.0, x1, 0.0]}
+
+
+def test_join_lines_reflows_prose():
+    # Every line runs to the block's right edge -> soft wraps -> one reflowed line.
+    block_bbox = [165.0, 0.0, 560.0, 0.0]
+    lines = [
+        _ln("This is the first wrapped line", 559.0),
+        _ln("and this is the second wrapped line", 559.0),
+        _ln("and a short final line.", 300.0),
+    ]
+    assert _join_lines(lines, block_bbox) == (
+        "This is the first wrapped line and this is the second wrapped line "
+        "and a short final line."
+    )
+
+
+def test_join_lines_preserves_enumerated_breaks():
+    # Superscript markers (1, 2) sit on their own short lines and must attach to
+    # the following line; the real ends of each item (short lines) become breaks.
+    block_bbox = [165.0, 0.0, 550.0, 0.0]
+    lines = [
+        _ln("1", 169.0),
+        _ln("Department of Mechanical Engineering, Air University", 550.0),
+        _ln("Islamabad, Pakistan", 383.0),
+        _ln("2", 169.0),
+        _ln("Control Engineering Department, King Fahd University", 542.0),
+        _ln("Dhahran, Saudi Arabia", 283.0),
+    ]
+    assert _join_lines(lines, block_bbox) == (
+        "1 Department of Mechanical Engineering, Air University Islamabad, Pakistan\n"
+        "2 Control Engineering Department, King Fahd University Dhahran, Saudi Arabia"
+    )
 
 
 def test_extract_structure(tiny_pdf):

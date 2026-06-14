@@ -3,6 +3,7 @@
 venv/
 __pycache__/
 *.pyc
+.pytest_cache/
 
 # Pipeline artifacts (regenerated each run)
 work/

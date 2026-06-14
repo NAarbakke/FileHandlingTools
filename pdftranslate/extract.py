@@ -2,12 +2,47 @@
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter
 from pathlib import Path
 
 import fitz  # PyMuPDF
 
 from .common import looks_untranslatable
+
+# A line whose right edge falls more than this fraction of the block width short
+# of the block's right edge is treated as a hard line break (e.g. the end of a
+# list item) rather than a soft word-wrap to be reflowed.
+SHORT_LINE_FRAC = 0.2
+
+# Lone enumeration markers (superscript "1", "2", a "*", a dagger) land on their
+# own line in PyMuPDF's output; they belong with the line that follows, so they
+# never start a hard break.
+_MARKER_RE = re.compile(r"^(\d{1,2}[.)]?|[*†‡§¶#])$")
+
+
+def _is_marker(text):
+    return bool(_MARKER_RE.match(text.strip()))
+
+
+def _join_lines(lines, block_bbox):
+    """Join a block's lines, preserving hard breaks as '\\n' and reflowing soft wraps.
+
+    `lines` is a list of dicts with "text" and a PyMuPDF "bbox" (x0, y0, x1, y1).
+    A line that ends well short of the block's right edge is a hard break; a
+    full-width line is a soft wrap joined with a space. Lone enumeration markers
+    attach to the next line instead of forcing a break after themselves.
+    """
+    if not lines:
+        return ""
+    bx0, _, bx1, _ = block_bbox
+    width = (bx1 - bx0) or 1.0
+    parts = [lines[0]["text"]]
+    for prev, cur in zip(lines, lines[1:]):
+        prev_short = (bx1 - prev["bbox"][2]) > SHORT_LINE_FRAC * width
+        hard = prev_short and not _is_marker(prev["text"])
+        parts.append(("\n" if hard else " ") + cur["text"])
+    return "".join(parts)
 
 
 def _extract_page(page, pno):
@@ -17,7 +52,7 @@ def _extract_page(page, pno):
     for block in data.get("blocks", []):
         if block.get("type", 0) != 0:
             continue  # image block — left untouched in the PDF
-        lines_text = []
+        block_lines = []
         sizes = []
         first_color = 0
         have_color = False
@@ -25,13 +60,15 @@ def _extract_page(page, pno):
             spans = line.get("spans", [])
             if not spans:
                 continue
-            lines_text.append("".join(s.get("text", "") for s in spans))
+            line_text = "".join(s.get("text", "") for s in spans)
+            if line_text:
+                block_lines.append({"text": line_text, "bbox": line["bbox"]})
             for s in spans:
                 sizes.append(round(s.get("size", 0.0), 2))
                 if not have_color:
                     first_color = s.get("color", 0)
                     have_color = True
-        text = " ".join(t for t in lines_text if t)
+        text = _join_lines(block_lines, block["bbox"])
         if not text.strip():
             continue
         size = Counter(sizes).most_common(1)[0][0] if sizes else 10.0
