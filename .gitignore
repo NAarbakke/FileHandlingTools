@@ -8,3 +8,9 @@ __pycache__/
 # Pipeline artifacts (regenerated each run)
 work/
 output/
+
+# Editor
+.zed/
+
+# Agents
+.claude/
