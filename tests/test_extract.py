@@ -1,6 +1,6 @@
 import json
 
-from pdftranslate.extract import _join_lines, extract_document, run
+from translate.extract import _join_lines, extract_document, run
 
 REQUIRED_BLOCK_KEYS = {"id", "bbox", "text", "size", "color", "skip", "skip_reason"}
 

@@ -1,7 +1,7 @@
 import fitz
 
-from pdftranslate.extract import extract_document
-from pdftranslate import rebuild
+from translate.extract import extract_document
+from translate import rebuild
 
 
 def test_rebuild_redacts_and_inserts(tiny_pdf, tmp_path):

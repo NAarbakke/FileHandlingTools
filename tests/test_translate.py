@@ -1,4 +1,4 @@
-from pdftranslate import translate
+from translate import translate
 
 
 def make_doc():

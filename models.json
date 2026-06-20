@@ -1,0 +1,12 @@
+{
+  "translate": {
+    "translate": "gemma2:2b"
+  },
+  "transcribe": {
+    "transcribe": "qwen2.5vl:3b",
+    "cleanup": "gemma2:2b"
+  },
+  "_alternatives": {
+    "transcribe.transcribe": ["moondream", "minicpm-v", "qwen2.5vl:7b"]
+  }
+}

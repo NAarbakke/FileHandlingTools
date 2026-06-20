@@ -1,4 +1,4 @@
-from pdftranslate.common import color_int_to_rgb, looks_untranslatable
+from translate.common import color_int_to_rgb, looks_untranslatable
 
 
 def test_color_white():
