@@ -1,39 +1,20 @@
 """End-to-end transcribe pipeline: ingest -> transcribe -> assemble -> render.
 
 This is the tool's public entry point, called by the unified TUI and by tests.
-Model defaults are resolved from the shared repo-root `models.json` via `modelmap`;
+Model defaults are resolved from the shared `core/models.json` via `core.modelmap`;
 `transcriber`/`cleaner` can be injected to run without a live Ollama server.
 """
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
+
+from core import modelmap
+from core.pages import parse_pages
 
 from . import ingest, transcribe, assemble, render
 
-# Make the repo-root shared model mapper importable regardless of CWD.
-_ROOT = Path(__file__).resolve().parents[1]
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
-import modelmap  # noqa: E402
-
-
-def parse_pages(spec):
-    """'1-5' / '3' / '1-2,5' (1-based) -> set of 0-based indices. None if empty."""
-    if not spec:
-        return None
-    result = set()
-    for part in spec.split(","):
-        part = part.strip()
-        if not part:
-            continue
-        if "-" in part:
-            a, b = part.split("-", 1)
-            result.update(range(int(a) - 1, int(b)))
-        else:
-            result.add(int(part) - 1)
-    return result
+__all__ = ["pipeline", "parse_pages"]
 
 
 def pipeline(input_path, *, formats=("md",), model=None, cleanup=False, cleanup_model=None,

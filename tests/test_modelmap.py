@@ -1,4 +1,4 @@
-import modelmap
+from core import modelmap
 
 
 def test_get_model_reads_config():

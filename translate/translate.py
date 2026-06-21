@@ -3,10 +3,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-import urllib.request
 from pathlib import Path
 
-OLLAMA_URL = "http://localhost:11434/api/chat"
+from core import ollama
 
 LANG_NAMES = {"en": "English", "no": "Norwegian (Bokmål)"}
 
@@ -21,7 +20,7 @@ SYSTEM_PROMPT = (
 class OllamaTranslator:
     """Callable translator backed by a local Ollama chat model."""
 
-    def __init__(self, model="gemma2:2b", url=OLLAMA_URL, src="en", tgt="no", temperature=0.2, timeout=300):
+    def __init__(self, model="gemma2:2b", url=ollama.OLLAMA_URL, src="en", tgt="no", temperature=0.2, timeout=300):
         self.model = model
         self.url = url
         self.timeout = timeout
@@ -31,22 +30,12 @@ class OllamaTranslator:
         )
 
     def __call__(self, text):
-        payload = {
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": self.system},
-                {"role": "user", "content": text},
-            ],
-            "stream": False,
-            "options": {"temperature": self.temperature},
-        }
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            self.url, data=data, headers={"Content-Type": "application/json"}
-        )
-        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-            body = json.loads(resp.read().decode("utf-8"))
-        return body["message"]["content"].strip()
+        messages = [
+            {"role": "system", "content": self.system},
+            {"role": "user", "content": text},
+        ]
+        return ollama.chat(self.model, messages, url=self.url,
+                           temperature=self.temperature, timeout=self.timeout)
 
 
 def cache_key(model, src, tgt, text):

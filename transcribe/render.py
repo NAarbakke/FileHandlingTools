@@ -13,7 +13,7 @@ from pathlib import Path
 import fitz
 from docx import Document
 
-FONT_FILE = Path(__file__).parent / "assets" / "DejaVuSans.ttf"
+FONT_FILE = Path(__file__).resolve().parents[1] / "core" / "assets" / "DejaVuSans.ttf"
 FONT_NAME = "djv"
 
 _HEADING = re.compile(r"^(#{1,6})\s+(.*)$")

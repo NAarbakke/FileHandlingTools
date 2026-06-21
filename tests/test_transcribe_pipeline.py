@@ -27,7 +27,7 @@ def test_pipeline_end_to_end_with_injected_transcriber(tiny_png, tmp_path):
 
 
 def test_pipeline_default_model_comes_from_mapper(tiny_png, tmp_path, monkeypatch):
-    import modelmap
+    from core import modelmap
     monkeypatch.setattr(modelmap, "get_model", lambda *a, **k: "SENTINEL:vlm")
 
     captured = {}

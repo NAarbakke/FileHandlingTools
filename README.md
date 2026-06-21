@@ -8,8 +8,21 @@ Ollama model configuration. Everything runs on your machine — no cloud, no API
 | **translate**  | translate a born-digital PDF, keeping its original layout and figures |
 | **transcribe** | transcribe handwritten notes (photo, scan, or PDF) into md / txt / docx / pdf |
 
-Which model each tool uses is defined once in [`models.json`](models.json) — see
-[Shared model mapper](#shared-model-mapper).
+Which model each tool uses is defined once in [`core/models.json`](core/models.json) —
+see [Shared model mapper](#shared-model-mapper).
+
+## Layout
+
+```
+tui.py          entry point (the menu)
+core/           shared internals: model mapper (modelmap.py + models.json),
+                Ollama client (ollama.py), helpers (pages.py), bundled font
+translate/      PDF translate pipeline: extract -> translate -> rebuild -> render_qa
+transcribe/     handwriting pipeline:    ingest  -> transcribe -> assemble -> render
+tests/          pytest suite (runs without Ollama; model calls are mocked)
+```
+
+Each tool is a package exposing one `pipeline()` function that the TUI and tests call.
 
 ## Setup
 
@@ -123,8 +136,8 @@ reconstructed as a clean linear document, not a pixel-faithful copy.
 
 ## Shared model mapper
 
-`models.json` at the repo root is the single source of truth for which Ollama model each
-tool/role uses; `modelmap.py` reads it. Both tools take their default model from here (an
+`core/models.json` is the single source of truth for which Ollama model each tool/role
+uses; `core/modelmap.py` reads it. Both tools take their default model from here (an
 explicit `model=` argument to `pipeline()` overrides it).
 
 ```json

@@ -11,7 +11,7 @@ import fitz
 
 from .common import color_int_to_rgb
 
-FONT_FILE = Path(__file__).parent / "assets" / "DejaVuSans.ttf"
+FONT_FILE = Path(__file__).resolve().parents[1] / "core" / "assets" / "DejaVuSans.ttf"
 FONT_NAME = "djv"
 MIN_FONT_SIZE = 4.0
 

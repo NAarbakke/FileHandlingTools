@@ -9,10 +9,9 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
-import urllib.request
 from pathlib import Path
 
-OLLAMA_URL = "http://localhost:11434/api/chat"
+from core import ollama
 
 SYSTEM_PROMPT = (
     "You are a careful transcriber of handwritten notes. "
@@ -33,7 +32,7 @@ def _b64_image(path):
 class OllamaTranscriber:
     """Callable transcriber backed by a local Ollama vision (VLM) chat model."""
 
-    def __init__(self, model="qwen2.5vl:3b", url=OLLAMA_URL, temperature=0.1, timeout=600):
+    def __init__(self, model="qwen2.5vl:3b", url=ollama.OLLAMA_URL, temperature=0.1, timeout=600):
         self.model = model
         self.url = url
         self.temperature = temperature
@@ -41,23 +40,13 @@ class OllamaTranscriber:
         self.system = SYSTEM_PROMPT
 
     def __call__(self, image_path):
-        payload = {
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": self.system},
-                {"role": "user", "content": "Transcribe this page.",
-                 "images": [_b64_image(image_path)]},
-            ],
-            "stream": False,
-            "options": {"temperature": self.temperature},
-        }
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            self.url, data=data, headers={"Content-Type": "application/json"}
-        )
-        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-            body = json.loads(resp.read().decode("utf-8"))
-        return body["message"]["content"].strip()
+        messages = [
+            {"role": "system", "content": self.system},
+            {"role": "user", "content": "Transcribe this page.",
+             "images": [_b64_image(image_path)]},
+        ]
+        return ollama.chat(self.model, messages, url=self.url,
+                           temperature=self.temperature, timeout=self.timeout)
 
 
 def cache_key(model, image_path):

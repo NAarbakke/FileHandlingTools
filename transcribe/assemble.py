@@ -8,10 +8,9 @@ the original is kept under `markdown_raw` for traceability.
 from __future__ import annotations
 
 import json
-import urllib.request
 from pathlib import Path
 
-OLLAMA_URL = "http://localhost:11434/api/chat"
+from core import ollama
 
 CLEANUP_SYSTEM = (
     "You tidy a raw transcription of handwritten notes, given as Markdown. "
@@ -26,7 +25,7 @@ CLEANUP_SYSTEM = (
 class OllamaCleaner:
     """Callable text tidier backed by a local Ollama chat model (no images)."""
 
-    def __init__(self, model="gemma2:2b", url=OLLAMA_URL, temperature=0.0, timeout=300):
+    def __init__(self, model="gemma2:2b", url=ollama.OLLAMA_URL, temperature=0.0, timeout=300):
         self.model = model
         self.url = url
         self.temperature = temperature
@@ -34,22 +33,12 @@ class OllamaCleaner:
         self.system = CLEANUP_SYSTEM
 
     def __call__(self, markdown):
-        payload = {
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": self.system},
-                {"role": "user", "content": markdown},
-            ],
-            "stream": False,
-            "options": {"temperature": self.temperature},
-        }
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            self.url, data=data, headers={"Content-Type": "application/json"}
-        )
-        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-            body = json.loads(resp.read().decode("utf-8"))
-        return body["message"]["content"].strip()
+        messages = [
+            {"role": "system", "content": self.system},
+            {"role": "user", "content": markdown},
+        ]
+        return ollama.chat(self.model, messages, url=self.url,
+                           temperature=self.temperature, timeout=self.timeout)
 
 
 def cleanup_document(transcript, cleaner, progress=None):
