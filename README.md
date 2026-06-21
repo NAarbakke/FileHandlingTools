@@ -13,10 +13,11 @@ Which model each tool uses is defined once in [`models.json`](models.json) — s
 
 ## Setup
 
+This project uses [uv](https://docs.astral.sh/uv/). One command creates the virtual
+environment and installs everything (runtime + dev tools), pinned by `uv.lock`:
+
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+uv sync
 ```
 
 Install [Ollama](https://ollama.com) and pull the models you need:
@@ -30,7 +31,7 @@ ollama pull moondream      # optional: smaller/faster vision fallback for low-VR
 ## Run — the menu
 
 ```powershell
-python tui.py
+uv run python tui.py
 ```
 
 Pick a tool by number; it prompts for the input file and a few options, runs the
@@ -139,7 +140,7 @@ Override without editing the file via an env var, e.g.
 ## Tests
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -q
+uv run pytest -q
 ```
 
 The suite runs without Ollama (the model calls are mocked).

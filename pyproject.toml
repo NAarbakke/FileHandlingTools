@@ -1,0 +1,23 @@
+[project]
+name = "filehandlingtools"
+version = "0.1.0"
+description = "Local, open-source document tools (translate, transcribe) run from one TUI."
+requires-python = ">=3.13"
+dependencies = [
+    "pymupdf>=1.24",
+    "python-docx>=1.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
+
+[tool.uv]
+# This is an app (scripts + top-level packages), not an installable library:
+# manage dependencies but don't try to build/install the project itself.
+package = false
+
+[tool.pytest.ini_options]
+# Put the repo root on sys.path so tests can import translate / transcribe / modelmap / tui.
+pythonpath = ["."]
