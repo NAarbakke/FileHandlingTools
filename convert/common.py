@@ -60,3 +60,11 @@ def cli(convert_fn, *, in_suffixes, out_suffix, description, argv=None):
         print(f"wrote {out_path}")
         written.append(out_path)
     return written
+
+
+def markitdown_to_md(in_path):
+    """Convert a docx/pptx file to Markdown via markitdown."""
+    from markitdown import MarkItDown
+
+    result = MarkItDown().convert(str(in_path))
+    return result.text_content
