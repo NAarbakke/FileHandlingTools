@@ -40,3 +40,30 @@ def two_page_pdf(tmp_path):
     doc.save(str(path))
     doc.close()
     return str(path)
+
+
+@pytest.fixture
+def tiny_docx(tmp_path):
+    """A small .docx with a heading and a body paragraph (python-docx)."""
+    from docx import Document
+    doc = Document()
+    doc.add_heading("Docx Title", level=1)
+    doc.add_paragraph("Body paragraph text.")
+    path = tmp_path / "tiny.docx"
+    doc.save(str(path))
+    return str(path)
+
+
+@pytest.fixture
+def tiny_pptx(tmp_path):
+    """A small .pptx with a title and a body textbox (python-pptx)."""
+    from pptx import Presentation
+    from pptx.util import Inches
+    prs = Presentation()
+    slide = prs.slides.add_slide(prs.slide_layouts[5])  # "Title Only"
+    slide.shapes.title.text = "Slide Title"
+    box = slide.shapes.add_textbox(Inches(1), Inches(1.5), Inches(5), Inches(2))
+    box.text_frame.text = "Slide body content."
+    path = tmp_path / "tiny.pptx"
+    prs.save(str(path))
+    return str(path)
