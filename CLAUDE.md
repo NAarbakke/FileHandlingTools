@@ -16,7 +16,7 @@ uv sync                       # create .venv and install runtime + dev deps (pin
 uv run python tui.py          # run the menu (the app's entry point)
 uv run pytest -q              # full test suite (no Ollama needed — model calls are injected)
 uv run pytest tests/test_translate.py -k parse_pages   # single test / filter
-uv run python convert/pdf_to_md.py report.pdf          # one-shot convert (no Ollama)
+uv run python -m convert.pdf_to_md report.pdf          # one-shot convert (no Ollama)
 ```
 
 The suite never touches a live model, so it is the primary feedback loop; you do **not**

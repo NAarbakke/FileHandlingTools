@@ -168,13 +168,13 @@ Four single-purpose scripts, each a pure `name(in_path) -> str` function:
 | `convert/docx_to_md.py` | Word `.docx` → Markdown | `markitdown` |
 | `convert/pptx_to_md.py` | PowerPoint `.pptx` → Markdown | `markitdown` |
 
-Run a script directly (writes a sibling file by default; `-o` overrides; multiple inputs are
-allowed):
+Run a script with `-m` (module form, so the `convert` package resolves; writes a sibling file
+by default; `-o` overrides; multiple inputs are allowed):
 
 ```powershell
-uv run python convert/pdf_to_md.py report.pdf            # -> report.md
-uv run python convert/pdf_to_txt.py a.pdf b.pdf          # -> a.txt, b.txt
-uv run python convert/docx_to_md.py notes.docx -o out.md
+uv run python -m convert.pdf_to_md report.pdf            # -> report.md
+uv run python -m convert.pdf_to_txt a.pdf b.pdf          # -> a.txt, b.txt
+uv run python -m convert.docx_to_md notes.docx -o out.md
 ```
 
 Or call the function (returns the converted text as a string):
