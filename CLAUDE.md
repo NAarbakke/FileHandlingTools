@@ -77,7 +77,8 @@ Both tools follow the identical shape, so changes to one usually have a mirror i
 - **convert** — born-digital, offline, no-model conversions. Four scripts
   (`pdf_to_md`, `pdf_to_txt`, `docx_to_md`, `pptx_to_md`), each a pure
   `name(in_path) -> str` seam wrapped by `convert/common.py`'s `cli()`.
-  Tools: `pymupdf4llm` (pdf->md), PyMuPDF (pdf->txt), `markitdown` (docx/pptx->md).
+  Tools: `pymupdf4llm` (pdf->md), PyMuPDF (pdf->txt), `mammoth` (docx->md),
+  `python-pptx` (pptx->md).
   Scanned PDFs are out of scope — use `transcribe` for those.
 
 ## Conventions
