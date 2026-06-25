@@ -72,3 +72,14 @@ def test_cli_wrong_suffix_errors(tmp_path):
     with pytest.raises(SystemExit):
         common.cli(lambda p: "X", in_suffixes={".pdf"}, out_suffix=".md",
                    description="t", argv=[src])
+
+
+def test_cli_conversion_failure_exits(tmp_path):
+    src = _touch(tmp_path / "a.pdf")
+
+    def boom(p):
+        raise RuntimeError("nope")
+
+    with pytest.raises(SystemExit):
+        common.cli(boom, in_suffixes={".pdf"}, out_suffix=".md",
+                   description="t", argv=[src])

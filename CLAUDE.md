@@ -27,8 +27,9 @@ regardless since it bypasses the shim.
 
 ## Architecture
 
-Two tools, one shared core, one menu. Each tool is a package exposing a single
-`pipeline()` function that both `tui.py` and the tests call.
+Three tools, one shared core, one menu. `translate` and `transcribe` are packages
+each exposing a single `pipeline()` function that both `tui.py` and the tests call;
+`convert` is a set of one-shot scripts (pure `name(in_path) -> str` functions), not a pipeline.
 
 ```
 tui.py        the menu; to add a tool, write run_<tool>() and append to TOOLS

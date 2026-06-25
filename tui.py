@@ -71,6 +71,8 @@ def run_transcribe(input_fn, output_fn):
 def run_convert(input_fn, output_fn):
     from pathlib import Path
 
+    # Imported lazily so launching the menu doesn't load the convert deps
+    # (pymupdf4llm / markitdown).
     from convert import common, docx_to_md, pdf_to_md, pdf_to_txt, pptx_to_md
 
     src = _ask(input_fn, "input file (pdf/docx/pptx)")
@@ -80,7 +82,7 @@ def run_convert(input_fn, output_fn):
 
     suf = Path(src).suffix.lower()
     if suf == ".pdf":
-        fmt = _ask(input_fn, "format (md/txt)", "md")
+        fmt = _ask(input_fn, "format (md/txt)", "md").lower()
         if fmt == "txt":
             fn, out_suffix = pdf_to_txt.pdf_to_txt, ".txt"
         else:
