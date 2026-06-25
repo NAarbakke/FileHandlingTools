@@ -8,8 +8,20 @@ To add a tool: write a `run_<tool>()` and append an entry to TOOLS.
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import translate
 import transcribe
+
+INPUT_DIR = Path("input")    # default location for source documents
+OUTPUT_DIR = Path("output")  # where convert writes when run from the menu
+
+# Suffixes used to list candidate files in input/ for each tool's picker.
+_PDF_EXTS = {".pdf"}
+_IMAGE_PDF_EXTS = _PDF_EXTS | {
+    ".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".gif", ".webp", ".pnm", ".ppm",
+}
+_CONVERT_EXTS = _PDF_EXTS | {".docx", ".pptx"}
 
 # A UTF-8 BOM can lead piped/redirected input: as U+FEFF, or — when stdin is read
 # under a byte-wise codec (Windows cp1252) — as the three chars '\xef\xbb\xbf'.
@@ -37,8 +49,30 @@ def _ask_yesno(input_fn, label, default=False):
     return val in ("y", "yes")
 
 
+def _pick_input(input_fn, output_fn, label, exts):
+    """Choose an input file: pick one listed in input/, or type any path.
+
+    Lists files in INPUT_DIR whose suffix is in `exts`; the user enters a list
+    number to pick one, or types a path to use a file from anywhere. Returns the
+    chosen path as a string ('' if cancelled).
+    """
+    files = []
+    if INPUT_DIR.is_dir():
+        files = sorted(p for p in INPUT_DIR.iterdir()
+                       if p.is_file() and p.suffix.lower() in exts)
+    if files:
+        output_fn(f"  files in {INPUT_DIR}/:")
+        for i, p in enumerate(files, 1):
+            output_fn(f"    {i}) {p.name}")
+        ans = _ask(input_fn, f"{label} — number above, or a path", "1")
+        if ans.isdigit() and 1 <= int(ans) <= len(files):
+            return str(files[int(ans) - 1])
+        return ans  # anything that isn't a list number is treated as a path
+    return _ask(input_fn, f"{label} (path)")
+
+
 def run_translate(input_fn, output_fn):
-    src = _ask(input_fn, "input PDF")
+    src = _pick_input(input_fn, output_fn, "input PDF", _PDF_EXTS)
     if not src:
         output_fn("  (no input — cancelled)")
         return
@@ -53,7 +87,7 @@ def run_translate(input_fn, output_fn):
 
 
 def run_transcribe(input_fn, output_fn):
-    src = _ask(input_fn, "input image/PDF")
+    src = _pick_input(input_fn, output_fn, "input image/PDF", _IMAGE_PDF_EXTS)
     if not src:
         output_fn("  (no input — cancelled)")
         return
@@ -69,13 +103,11 @@ def run_transcribe(input_fn, output_fn):
 
 
 def run_convert(input_fn, output_fn):
-    from pathlib import Path
-
     # Imported lazily so launching the menu doesn't load the convert deps
     # (pymupdf4llm / markitdown).
     from convert import common, docx_to_md, pdf_to_md, pdf_to_txt, pptx_to_md
 
-    src = _ask(input_fn, "input file (pdf/docx/pptx)")
+    src = _pick_input(input_fn, output_fn, "input file (pdf/docx/pptx)", _CONVERT_EXTS)
     if not src:
         output_fn("  (no input — cancelled)")
         return
@@ -95,7 +127,7 @@ def run_convert(input_fn, output_fn):
         output_fn(f"  unsupported input: {suf or '(none)'}")
         return
 
-    out_path = common.resolve_out(src, out_suffix)
+    out_path = OUTPUT_DIR / (Path(src).stem + out_suffix)
     common.write_output(fn(src), out_path)
     output_fn(f"  wrote: {out_path}")
 

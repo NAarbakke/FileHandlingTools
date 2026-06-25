@@ -23,6 +23,8 @@ core/           shared internals: model mapper (modelmap.py + models.json),
 translate/      PDF translate pipeline: extract -> translate -> rebuild -> render_qa
 transcribe/     handwriting pipeline:    ingest  -> transcribe -> assemble -> render
 convert/        offline conversions (no model): pdf/docx/pptx -> md/txt
+input/          drop source documents here (gitignored); the menu lists them to pick
+output/         generated results (gitignored)
 tests/          pytest suite (runs without Ollama; model calls are mocked)
 ```
 
@@ -53,8 +55,8 @@ ollama pull moondream      # optional: smaller/faster vision fallback for low-VR
 uv run python tui.py
 ```
 
-Pick a tool by number; it prompts for the input file and a few options, runs the
-pipeline, and writes to `output/`. Choose `0` to quit.
+Pick a tool by number; it lets you choose a source file from `input/` (or type any
+path), asks a few options, runs the pipeline, and writes to `output/`. Choose `0` to quit.
 
 ```
 FileHandlingTools
@@ -72,14 +74,16 @@ Select a tool [1]: 2
   wrote: output/notes.md, output/notes.docx, output/notes.pdf
 ```
 
-`convert` infers the source type from the file extension and writes the result next to the
-input (e.g. `report.pdf` → `report.md`):
+`convert` infers the source type from the file extension. From the menu it lists the files
+in `input/` to pick from (or type any path) and writes the result to `output/`:
 
 ```
 Select a tool [1]: 3
-  input file (pdf/docx/pptx): report.pdf
+  files in input/:
+    1) report.pdf
+  input file (pdf/docx/pptx) — number above, or a path [1]: 1
   format (md/txt) [md]: md
-  wrote: report.md
+  wrote: output/report.md
 ```
 
 ### Scripting (optional)
@@ -183,6 +187,9 @@ Or call the function (returns the converted text as a string):
 from convert.pptx_to_md import pptx_to_md
 md = pptx_to_md("deck.pptx")
 ```
+
+From the menu, `convert` reads from `input/` and writes to `output/` (the `-m` scripts above
+default to a sibling of the input file).
 
 **Note on offline ≠ no-LLM-limit:** convert never calls an LLM, so any size document converts
 fine. But it does **not** remove a downstream LLM's context window — feeding a very long result

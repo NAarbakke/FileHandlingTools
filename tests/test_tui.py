@@ -73,17 +73,21 @@ def test_translate_runner_invokes_pipeline(monkeypatch):
     assert captured["src"] == "en"   # source language
 
 
-def test_convert_runner_writes_sibling_file(tiny_pdf):
+def test_convert_runner_writes_to_output_dir(tiny_pdf, tmp_path, monkeypatch):
     from pathlib import Path
+    monkeypatch.setattr(tui, "INPUT_DIR", tmp_path / "noinput")  # empty -> path prompt
+    out_dir = tmp_path / "out"
+    monkeypatch.setattr(tui, "OUTPUT_DIR", out_dir)
     out = []
     tui.run_convert(feeder([tiny_pdf, "txt"]), out.append)
-    sibling = Path(tiny_pdf).with_suffix(".txt")
-    assert sibling.exists()
-    assert "Hello world" in sibling.read_text(encoding="utf-8")
+    produced = out_dir / (Path(tiny_pdf).stem + ".txt")
+    assert produced.exists()
+    assert "Hello world" in produced.read_text(encoding="utf-8")
     assert any("wrote" in line for line in out)
 
 
-def test_convert_runner_rejects_unsupported_suffix(tmp_path):
+def test_convert_runner_rejects_unsupported_suffix(tmp_path, monkeypatch):
+    monkeypatch.setattr(tui, "INPUT_DIR", tmp_path / "noinput")
     bad = tmp_path / "data.csv"
     bad.write_text("x", encoding="utf-8")
     out = []
@@ -94,3 +98,24 @@ def test_convert_runner_rejects_unsupported_suffix(tmp_path):
 def test_convert_is_registered_in_tools():
     labels = [t["label"] for t in tui.TOOLS]
     assert "convert" in labels
+
+
+def test_pick_input_lists_and_picks_by_number(tmp_path, monkeypatch):
+    (tmp_path / "a.pdf").write_text("", encoding="utf-8")
+    (tmp_path / "b.pdf").write_text("", encoding="utf-8")
+    monkeypatch.setattr(tui, "INPUT_DIR", tmp_path)
+    got = tui._pick_input(feeder(["2"]), lambda *_: None, "input", {".pdf"})
+    assert got == str(tmp_path / "b.pdf")
+
+
+def test_pick_input_accepts_custom_path_when_typed(tmp_path, monkeypatch):
+    (tmp_path / "a.pdf").write_text("", encoding="utf-8")
+    monkeypatch.setattr(tui, "INPUT_DIR", tmp_path)
+    got = tui._pick_input(feeder(["/some/where/custom.pdf"]), lambda *_: None, "input", {".pdf"})
+    assert got == "/some/where/custom.pdf"
+
+
+def test_pick_input_falls_through_when_dir_empty(tmp_path, monkeypatch):
+    monkeypatch.setattr(tui, "INPUT_DIR", tmp_path / "empty")
+    got = tui._pick_input(feeder(["typed.pdf"]), lambda *_: None, "input", {".pdf"})
+    assert got == "typed.pdf"

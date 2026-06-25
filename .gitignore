@@ -9,6 +9,10 @@ __pycache__/
 work/
 output/
 
+# User input documents (drop source files here; contents not tracked)
+input/*
+!input/.gitkeep
+
 # Editor
 .zed/
 

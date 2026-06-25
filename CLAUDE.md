@@ -90,5 +90,8 @@ Both tools follow the identical shape, so changes to one usually have a mirror i
   fixtures except the integration docs in `tests/test_docs/`.
 - `tui.py` strips UTF-8 BOMs from stdin (Windows piped-input quirk) and keeps the menu
   alive on per-tool exceptions.
+- `tui.py` sources inputs via `_pick_input` (lists matching files in `input/`, or accepts a
+  typed path). `input/` and `output/` are gitignored runtime dirs. The convert menu writes to
+  `output/`; the convert CLI scripts (`python -m convert.<name>`) default to a sibling of the input.
 - Dated design/implementation notes live in `docs/specs/` (specs) and `docs/plans/`
   (plans) — one pair per feature (e.g. the original `translate` work and the `convert` tools).
