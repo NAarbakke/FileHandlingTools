@@ -35,6 +35,7 @@ tui.py        the menu; to add a tool, write run_<tool>() and append to TOOLS
 core/         shared internals (see below)
 translate/    extract -> translate -> rebuild -> render_qa
 transcribe/   ingest  -> transcribe -> assemble -> render
+convert/      one-shot, offline, no-model conversions (pdf/docx/pptx -> md/txt)
 ```
 
 ### `core/` — single source of truth shared by both tools
@@ -72,6 +73,11 @@ Both tools follow the identical shape, so changes to one usually have a mirror i
 - **transcribe** — image or PDF → verbatim Markdown via a local VLM (the prompt forbids
   translating/rewording). Optional `cleanup` pass is formatting-only. `render.py` emits
   md/txt/pdf with stdlib + PyMuPDF; docx uses `python-docx`. No Pillow anywhere.
+- **convert** — born-digital, offline, no-model conversions. Four scripts
+  (`pdf_to_md`, `pdf_to_txt`, `docx_to_md`, `pptx_to_md`), each a pure
+  `name(in_path) -> str` seam wrapped by `convert/common.py`'s `cli()`.
+  Tools: `pymupdf4llm` (pdf->md), PyMuPDF (pdf->txt), `markitdown` (docx/pptx->md).
+  Scanned PDFs are out of scope — use `transcribe` for those.
 
 ## Conventions
 - `pyproject.toml` sets `pythonpath = ["."]` so tests import `translate` / `transcribe` /

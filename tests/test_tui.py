@@ -71,3 +71,26 @@ def test_translate_runner_invokes_pipeline(monkeypatch):
     assert captured["input"] == "paper.pdf"
     assert captured["tgt"] == "no"   # target language
     assert captured["src"] == "en"   # source language
+
+
+def test_convert_runner_writes_sibling_file(tiny_pdf):
+    from pathlib import Path
+    out = []
+    tui.run_convert(feeder([tiny_pdf, "txt"]), out.append)
+    sibling = Path(tiny_pdf).with_suffix(".txt")
+    assert sibling.exists()
+    assert "Hello world" in sibling.read_text(encoding="utf-8")
+    assert any("wrote" in line for line in out)
+
+
+def test_convert_runner_rejects_unsupported_suffix(tmp_path):
+    bad = tmp_path / "data.csv"
+    bad.write_text("x", encoding="utf-8")
+    out = []
+    tui.run_convert(feeder([str(bad)]), out.append)
+    assert any("unsupported" in line.lower() for line in out)
+
+
+def test_convert_is_registered_in_tools():
+    labels = [t["label"] for t in tui.TOOLS]
+    assert "convert" in labels

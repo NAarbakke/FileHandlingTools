@@ -68,9 +68,40 @@ def run_transcribe(input_fn, output_fn):
     output_fn("  wrote: " + ", ".join(written.values()))
 
 
+def run_convert(input_fn, output_fn):
+    from pathlib import Path
+
+    from convert import common, docx_to_md, pdf_to_md, pdf_to_txt, pptx_to_md
+
+    src = _ask(input_fn, "input file (pdf/docx/pptx)")
+    if not src:
+        output_fn("  (no input — cancelled)")
+        return
+
+    suf = Path(src).suffix.lower()
+    if suf == ".pdf":
+        fmt = _ask(input_fn, "format (md/txt)", "md")
+        if fmt == "txt":
+            fn, out_suffix = pdf_to_txt.pdf_to_txt, ".txt"
+        else:
+            fn, out_suffix = pdf_to_md.pdf_to_md, ".md"
+    elif suf == ".docx":
+        fn, out_suffix = docx_to_md.docx_to_md, ".md"
+    elif suf == ".pptx":
+        fn, out_suffix = pptx_to_md.pptx_to_md, ".md"
+    else:
+        output_fn(f"  unsupported input: {suf or '(none)'}")
+        return
+
+    out_path = common.resolve_out(src, out_suffix)
+    common.write_output(fn(src), out_path)
+    output_fn(f"  wrote: {out_path}")
+
+
 TOOLS = [
     {"key": "1", "label": "translate", "desc": "translate a PDF, keep layout", "run": run_translate},
     {"key": "2", "label": "transcribe", "desc": "handwritten notes -> md/txt/docx/pdf", "run": run_transcribe},
+    {"key": "3", "label": "convert", "desc": "pdf/docx/pptx -> md/txt", "run": run_convert},
 ]
 
 
