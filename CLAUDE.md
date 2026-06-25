@@ -88,5 +88,5 @@ Both tools follow the identical shape, so changes to one usually have a mirror i
   fixtures except the integration docs in `tests/test_docs/`.
 - `tui.py` strips UTF-8 BOMs from stdin (Windows piped-input quirk) and keeps the menu
   alive on per-tool exceptions.
-- Design/implementation notes for the original `translate` work live in `docs/specs/`
-  and `docs/plans/`.
+- Dated design/implementation notes live in `docs/specs/` (specs) and `docs/plans/`
+  (plans) — one pair per feature (e.g. the original `translate` work and the `convert` tools).

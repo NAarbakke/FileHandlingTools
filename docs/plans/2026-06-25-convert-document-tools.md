@@ -759,3 +759,31 @@ git commit -m "docs: document the convert tool in CLAUDE.md"
 **2. Placeholder scan:** No TBD/TODO/"handle edge cases"; every code step shows full code. The markitdown attribute uncertainty (Task 5 Step 2) is resolved with the exact attribute (`text_content`) and a named fallback (`.markdown`), not a placeholder.
 
 **3. Type consistency:** `check_suffix`, `resolve_out`, `write_output`, `cli`, `markitdown_to_md` names are used identically across Tasks 1–7. Each conversion function name matches its module (`pdf_to_md.pdf_to_md`, etc.) and its later use in `run_convert`. ✓
+
+---
+
+## Execution record
+
+Built 2026-06-25 via subagent-driven development (foundation agent → four parallel
+script agents → wiring agent → whole-branch review → fix pass). Merged to `master`.
+Spec: [../specs/2026-06-25-convert-document-conversion-tools-design.md](../specs/2026-06-25-convert-document-conversion-tools-design.md).
+
+**Commit trail (off master @ becbda0):**
+
+- `d23d610` foundation — common helpers, cli, deps, fixtures
+- `2f412a1` four conversion scripts
+- `d4e6cec` TUI wiring + CLAUDE.md
+- `a2c6f3f` review fixes (cli failure-path test; lowercase TUI format input; doc fix)
+- `e8639e0` swap markitdown → mammoth + python-pptx  *(later reverted)*
+- `c608252` revert the swap — restore markitdown
+
+**onnxruntime / markitdown decision:** the review flagged that markitdown pulls
+`magika → onnxruntime` (a local ML stack), in tension with the project's "no model,
+lean" ethos. We swapped to mammoth + python-pptx (e8639e0) — but then found
+`pymupdf4llm` *also* pulls onnxruntime (via `pymupdf-layout`), so the swap couldn't
+remove it anyway. Decision: **accept onnxruntime** (offline; powers genuine PDF
+layout detection) and **keep markitdown** (richer pptx extraction: tables, speaker
+notes). The swap was reverted (c608252).
+
+**Review:** opus whole-branch review returned APPROVE-WITH-NITS, no Critical/blocking
+defects. Final state: 78 tests pass, no model/network in the suite.
