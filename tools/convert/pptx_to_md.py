@@ -1,7 +1,7 @@
 """Convert a PowerPoint .pptx file to Markdown (markitdown)."""
 from __future__ import annotations
 
-from convert import common
+from tools.convert import common
 
 
 def pptx_to_md(in_path):

@@ -1,4 +1,4 @@
-from translate import render_qa
+from tools.translate import render_qa
 
 
 def test_render_pages_writes_pngs(tiny_pdf, tmp_path):

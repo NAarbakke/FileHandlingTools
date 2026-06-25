@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import fitz
 
-from convert import common
+from tools.convert import common
 
 
 def pdf_to_txt(in_path):

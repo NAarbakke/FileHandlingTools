@@ -1,4 +1,4 @@
-from translate import translate
+from tools.translate import translate
 
 
 def make_doc():

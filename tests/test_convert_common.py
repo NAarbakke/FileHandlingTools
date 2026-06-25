@@ -1,6 +1,6 @@
 import pytest
 
-from convert import common
+from tools.convert import common
 
 
 def test_check_suffix_accepts_allowed():

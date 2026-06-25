@@ -2,7 +2,7 @@ from pathlib import Path
 
 import fitz
 
-from transcribe import ingest
+from tools.transcribe import ingest
 
 
 def test_ingest_pdf_writes_one_png_per_page(two_page_pdf, tmp_path):

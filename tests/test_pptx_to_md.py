@@ -1,4 +1,4 @@
-from convert.pptx_to_md import pptx_to_md
+from tools.convert.pptx_to_md import pptx_to_md
 
 
 def test_pptx_to_md_returns_markdown_with_text(tiny_pptx):

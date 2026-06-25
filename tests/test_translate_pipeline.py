@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import translate
+from tools import translate
 
 
 def test_parse_pages():
@@ -28,7 +28,7 @@ def test_pipeline_default_model_comes_from_mapper(tiny_pdf, tmp_path, monkeypatc
     monkeypatch.setattr(modelmap, "get_model", lambda *a, **k: "SENTINEL:model")
 
     captured = {}
-    import translate.translate as T
+    import tools.translate.translate as T
     monkeypatch.setattr(T, "OllamaTranslator",
                         lambda **kw: captured.update(kw) or (lambda t: f"NO:{t}"))
 

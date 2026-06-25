@@ -15,11 +15,11 @@ entry-point guard run by default. Run the full set with:
 
 Regenerating the goldens (after a deliberate dependency bump that changes output):
 
-    uv run python -m convert.docx_to_md  tests/test_docs/report.docx               -o tests/test_docs/expected/report.md
-    uv run python -m convert.pptx_to_md  tests/test_docs/deck.pptx                 -o tests/test_docs/expected/deck.md
-    uv run python -m convert.pdf_to_txt  tests/test_docs/translation-test-doc.pdf  -o tests/test_docs/expected/translation-test-doc.txt
-    uv run python -m convert.pdf_to_txt  tests/test_docs/handwritten-test-doc.pdf  -o tests/test_docs/expected/handwritten-test-doc.txt
-    uv run python -m convert.pdf_to_md   tests/test_docs/translation-test-doc.pdf  -o tests/test_docs/expected/translation-test-doc.md
+    uv run python -m tools.convert.docx_to_md  tests/test_docs/report.docx               -o tests/test_docs/expected/report.md
+    uv run python -m tools.convert.pptx_to_md  tests/test_docs/deck.pptx                 -o tests/test_docs/expected/deck.md
+    uv run python -m tools.convert.pdf_to_txt  tests/test_docs/translation-test-doc.pdf  -o tests/test_docs/expected/translation-test-doc.txt
+    uv run python -m tools.convert.pdf_to_txt  tests/test_docs/handwritten-test-doc.pdf  -o tests/test_docs/expected/handwritten-test-doc.txt
+    uv run python -m tools.convert.pdf_to_md   tests/test_docs/translation-test-doc.pdf  -o tests/test_docs/expected/translation-test-doc.md
 """
 from __future__ import annotations
 
@@ -53,7 +53,7 @@ def _golden(name):
 # --- fast (PyMuPDF only, no ML deps) — run by default --------------------------
 
 def test_pdf_to_txt_matches_golden():
-    from convert.pdf_to_txt import pdf_to_txt
+    from tools.convert.pdf_to_txt import pdf_to_txt
 
     out = _norm(pdf_to_txt(str(DOCS / "translation-test-doc.pdf")))
     assert out == _golden("translation-test-doc.txt")
@@ -65,7 +65,7 @@ def test_pdf_to_txt_scanned_is_sparse():
 
     Documents the born-digital limitation: scans are transcribe's job, not convert's.
     """
-    from convert.pdf_to_txt import pdf_to_txt
+    from tools.convert.pdf_to_txt import pdf_to_txt
 
     out = _norm(pdf_to_txt(str(DOCS / "handwritten-test-doc.pdf")))
     assert out == _golden("handwritten-test-doc.txt")
@@ -73,7 +73,7 @@ def test_pdf_to_txt_scanned_is_sparse():
 
 
 def test_cli_entrypoint_runs_via_module(tmp_path):
-    """Guard the documented `python -m convert.<name>` invocation end-to-end.
+    """Guard the documented `python -m tools.convert.<name>` invocation end-to-end.
 
     Regression test for the import bug: running a script by file path put the
     package dir (not the repo root) on sys.path, breaking `from convert import common`.
@@ -81,7 +81,7 @@ def test_cli_entrypoint_runs_via_module(tmp_path):
     """
     out = tmp_path / "out.txt"
     result = subprocess.run(
-        [sys.executable, "-m", "convert.pdf_to_txt",
+        [sys.executable, "-m", "tools.convert.pdf_to_txt",
          str(DOCS / "handwritten-test-doc.pdf"), "-o", str(out)],
         cwd=REPO_ROOT,
         capture_output=True,
@@ -95,7 +95,7 @@ def test_cli_entrypoint_runs_via_module(tmp_path):
 
 @slow
 def test_docx_to_md_matches_golden():
-    from convert.docx_to_md import docx_to_md
+    from tools.convert.docx_to_md import docx_to_md
 
     out = _norm(docx_to_md(str(DOCS / "report.docx")))
     assert out == _golden("report.md")
@@ -105,7 +105,7 @@ def test_docx_to_md_matches_golden():
 
 @slow
 def test_pptx_to_md_matches_golden():
-    from convert.pptx_to_md import pptx_to_md
+    from tools.convert.pptx_to_md import pptx_to_md
 
     out = _norm(pptx_to_md(str(DOCS / "deck.pptx")))
     assert out == _golden("deck.md")
@@ -116,7 +116,7 @@ def test_pptx_to_md_matches_golden():
 
 @slow
 def test_pdf_to_md_matches_golden():
-    from convert.pdf_to_md import pdf_to_md
+    from tools.convert.pdf_to_md import pdf_to_md
 
     out = _norm(pdf_to_md(str(DOCS / "translation-test-doc.pdf")))
     assert out == _golden("translation-test-doc.md")

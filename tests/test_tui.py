@@ -46,7 +46,7 @@ def test_tool_error_does_not_crash_menu():
 
 
 def test_transcribe_runner_invokes_pipeline(monkeypatch):
-    import transcribe
+    from tools import transcribe
     captured = {}
     monkeypatch.setattr(transcribe, "pipeline",
                         lambda src, **kw: captured.update(src=src, **kw) or {"md": "output/x.md"})
@@ -58,7 +58,7 @@ def test_transcribe_runner_invokes_pipeline(monkeypatch):
 
 
 def test_translate_runner_invokes_pipeline(monkeypatch):
-    import translate
+    from tools import translate
     captured = {}
 
     def fake(input_path, **kw):

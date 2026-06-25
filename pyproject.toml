@@ -22,5 +22,5 @@ dev = [
 package = false
 
 [tool.pytest.ini_options]
-# Put the repo root on sys.path so tests can import translate / transcribe / modelmap / tui.
+# Put the repo root on sys.path so tests can import tools.* / core / tui as top-level packages.
 pythonpath = ["."]

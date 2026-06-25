@@ -1,4 +1,4 @@
-from convert.pdf_to_txt import pdf_to_txt
+from tools.convert.pdf_to_txt import pdf_to_txt
 
 
 def test_pdf_to_txt_extracts_text(tiny_pdf):

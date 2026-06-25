@@ -16,7 +16,7 @@ uv sync                       # create .venv and install runtime + dev deps (pin
 uv run python tui.py          # run the menu (the app's entry point)
 uv run pytest -q              # full test suite (no Ollama needed — model calls are injected)
 uv run pytest tests/test_translate.py -k parse_pages   # single test / filter
-uv run python -m convert.pdf_to_md report.pdf          # one-shot convert (no Ollama)
+uv run python -m tools.convert.pdf_to_md report.pdf          # one-shot convert (no Ollama)
 ```
 
 The suite never touches a live model, so it is the primary feedback loop; you do **not**
@@ -36,9 +36,10 @@ each exposing a single `pipeline()` function that both `tui.py` and the tests ca
 ```
 tui.py        the menu; to add a tool, write run_<tool>() and append to TOOLS
 core/         shared internals (see below)
-translate/    extract -> translate -> rebuild -> render_qa
-transcribe/   ingest  -> transcribe -> assemble -> render
-convert/      one-shot, offline, no-model conversions (pdf/docx/pptx -> md/txt)
+tools/        the three tools, each a package:
+  translate/  extract -> translate -> rebuild -> render_qa
+  transcribe/ ingest  -> transcribe -> assemble -> render
+  convert/    one-shot, offline, no-model conversions (pdf/docx/pptx -> md/txt)
 ```
 
 ### `core/` — single source of truth shared by both tools
@@ -83,15 +84,15 @@ Both tools follow the identical shape, so changes to one usually have a mirror i
   Scanned PDFs are out of scope — use `transcribe` for those.
 
 ## Conventions
-- `pyproject.toml` sets `pythonpath = ["."]` so tests import `translate` / `transcribe` /
-  `convert` / `core` / `tui` as top-level packages. `[tool.uv] package = false` — this is an
-  app, not an installable library.
+- `pyproject.toml` sets `pythonpath = ["."]` so tests import `tools.translate` /
+  `tools.transcribe` / `tools.convert` / `core` / `tui` as top-level packages.
+  `[tool.uv] package = false` — this is an app, not an installable library.
 - Tests build fixtures (tiny PDFs/PNGs) with PyMuPDF in `tests/conftest.py`; no binary
   fixtures except the integration docs in `tests/test_docs/`.
 - `tui.py` strips UTF-8 BOMs from stdin (Windows piped-input quirk) and keeps the menu
   alive on per-tool exceptions.
 - `tui.py` sources inputs via `_pick_input` (lists matching files in `input/`, or accepts a
   typed path). `input/` and `output/` are gitignored runtime dirs. The convert menu writes to
-  `output/`; the convert CLI scripts (`python -m convert.<name>`) default to a sibling of the input.
+  `output/`; the convert CLI scripts (`python -m tools.convert.<name>`) default to a sibling of the input.
 - Dated design/implementation notes live in `docs/specs/` (specs) and `docs/plans/`
   (plans) — one pair per feature (e.g. the original `translate` work and the `convert` tools).

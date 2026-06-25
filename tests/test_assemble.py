@@ -1,7 +1,7 @@
 import json
 import urllib.request
 
-from transcribe import assemble
+from tools.transcribe import assemble
 
 
 def make_transcript():

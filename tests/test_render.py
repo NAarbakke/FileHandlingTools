@@ -1,7 +1,7 @@
 import fitz
 from docx import Document
 
-from transcribe import render
+from tools.transcribe import render
 
 
 def make_transcript():

@@ -2,7 +2,7 @@ import base64
 import json
 import urllib.request
 
-from transcribe import transcribe
+from tools.transcribe import transcribe
 
 
 def make_manifest(img):

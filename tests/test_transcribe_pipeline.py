@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import transcribe
+from tools import transcribe
 
 
 def test_parse_pages():
@@ -31,7 +31,7 @@ def test_pipeline_default_model_comes_from_mapper(tiny_png, tmp_path, monkeypatc
     monkeypatch.setattr(modelmap, "get_model", lambda *a, **k: "SENTINEL:vlm")
 
     captured = {}
-    import transcribe.transcribe as T
+    import tools.transcribe.transcribe as T
     monkeypatch.setattr(T, "OllamaTranscriber",
                         lambda **kw: captured.update(kw) or (lambda img: "x"))
 

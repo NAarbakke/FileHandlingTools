@@ -1,7 +1,7 @@
 """Convert a Word .docx file to Markdown (markitdown)."""
 from __future__ import annotations
 
-from convert import common
+from tools.convert import common
 
 
 def docx_to_md(in_path):

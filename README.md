@@ -20,9 +20,10 @@ Which model the `translate` / `transcribe` tools use is defined once in
 tui.py          entry point (the menu)
 core/           shared internals: model mapper (modelmap.py + models.json),
                 Ollama client (ollama.py), helpers (pages.py), bundled font
-translate/      PDF translate pipeline: extract -> translate -> rebuild -> render_qa
-transcribe/     handwriting pipeline:    ingest  -> transcribe -> assemble -> render
-convert/        offline conversions (no model): pdf/docx/pptx -> md/txt
+tools/          the three tools, each a package:
+  translate/    PDF translate pipeline: extract -> translate -> rebuild -> render_qa
+  transcribe/   handwriting pipeline:    ingest  -> transcribe -> assemble -> render
+  convert/      offline conversions (no model): pdf/docx/pptx -> md/txt
 input/          drop source documents here (gitignored); the menu lists them to pick
 output/         generated results (gitignored)
 tests/          pytest suite (runs without Ollama; model calls are mocked)
@@ -91,8 +92,8 @@ Select a tool [1]: 3
 Each tool is also a plain importable function, so you can drive it from Python:
 
 ```python
-import translate, transcribe
-from convert.pdf_to_md import pdf_to_md
+from tools import translate, transcribe
+from tools.convert.pdf_to_md import pdf_to_md
 
 translate.pipeline("paper.pdf", tgt="no")                       # -> output/paper.no.pdf
 transcribe.pipeline("notes.jpg", formats=["md", "docx", "pdf"], cleanup=True)
@@ -176,15 +177,15 @@ Run a script with `-m` (module form, so the `convert` package resolves; writes a
 by default; `-o` overrides; multiple inputs are allowed):
 
 ```powershell
-uv run python -m convert.pdf_to_md report.pdf            # -> report.md
-uv run python -m convert.pdf_to_txt a.pdf b.pdf          # -> a.txt, b.txt
-uv run python -m convert.docx_to_md notes.docx -o out.md
+uv run python -m tools.convert.pdf_to_md report.pdf            # -> report.md
+uv run python -m tools.convert.pdf_to_txt a.pdf b.pdf          # -> a.txt, b.txt
+uv run python -m tools.convert.docx_to_md notes.docx -o out.md
 ```
 
 Or call the function (returns the converted text as a string):
 
 ```python
-from convert.pptx_to_md import pptx_to_md
+from tools.convert.pptx_to_md import pptx_to_md
 md = pptx_to_md("deck.pptx")
 ```
 

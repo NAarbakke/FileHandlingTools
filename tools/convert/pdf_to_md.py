@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pymupdf4llm
 
-from convert import common
+from tools.convert import common
 
 
 def pdf_to_md(in_path):

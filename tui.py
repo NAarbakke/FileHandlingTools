@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import translate
-import transcribe
+from tools import translate
+from tools import transcribe
 
 INPUT_DIR = Path("input")    # default location for source documents
 OUTPUT_DIR = Path("output")  # where convert writes when run from the menu
@@ -105,7 +105,7 @@ def run_transcribe(input_fn, output_fn):
 def run_convert(input_fn, output_fn):
     # Imported lazily so launching the menu doesn't load the convert deps
     # (pymupdf4llm / markitdown).
-    from convert import common, docx_to_md, pdf_to_md, pdf_to_txt, pptx_to_md
+    from tools.convert import common, docx_to_md, pdf_to_md, pdf_to_txt, pptx_to_md
 
     src = _pick_input(input_fn, output_fn, "input file (pdf/docx/pptx)", _CONVERT_EXTS)
     if not src:
