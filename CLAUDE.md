@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Local, offline document tools (`translate`, `transcribe`) run from one terminal menu
-(`tui.py`), sharing a single Ollama model configuration. Everything runs on the user's
-machine via a local Ollama server — no cloud, no API keys. Python 3.13+, managed with `uv`.
+Local, offline document tools (`translate`, `transcribe`, `convert`) run from one terminal
+menu (`tui.py`). `translate` and `transcribe` share a single Ollama model configuration and
+run against a local Ollama server; `convert` is model-free (pure text extraction). Everything
+runs on the user's machine — no cloud, no API keys. Python 3.13+, managed with `uv`.
 
 ## Commands
 
@@ -15,6 +16,7 @@ uv sync                       # create .venv and install runtime + dev deps (pin
 uv run python tui.py          # run the menu (the app's entry point)
 uv run pytest -q              # full test suite (no Ollama needed — model calls are injected)
 uv run pytest tests/test_translate.py -k parse_pages   # single test / filter
+uv run python convert/pdf_to_md.py report.pdf          # one-shot convert (no Ollama)
 ```
 
 The suite never touches a live model, so it is the primary feedback loop; you do **not**
@@ -82,8 +84,8 @@ Both tools follow the identical shape, so changes to one usually have a mirror i
 
 ## Conventions
 - `pyproject.toml` sets `pythonpath = ["."]` so tests import `translate` / `transcribe` /
-  `core` / `tui` as top-level packages. `[tool.uv] package = false` — this is an app, not
-  an installable library.
+  `convert` / `core` / `tui` as top-level packages. `[tool.uv] package = false` — this is an
+  app, not an installable library.
 - Tests build fixtures (tiny PDFs/PNGs) with PyMuPDF in `tests/conftest.py`; no binary
   fixtures except the integration docs in `tests/test_docs/`.
 - `tui.py` strips UTF-8 BOMs from stdin (Windows piped-input quirk) and keeps the menu

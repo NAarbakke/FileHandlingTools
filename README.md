@@ -1,15 +1,18 @@
 # FileHandlingTools
 
-Local, open-source document tools, run from **one terminal menu** and sharing a single
-Ollama model configuration. Everything runs on your machine — no cloud, no API keys.
+Local, open-source document tools, run from **one terminal menu**. Everything runs on your
+machine — no cloud, no API keys. `translate` and `transcribe` share a single Ollama model
+configuration; `convert` is fully offline (no model at all).
 
 | Tool | What it does |
 |------|--------------|
 | **translate**  | translate a born-digital PDF, keeping its original layout and figures |
 | **transcribe** | transcribe handwritten notes (photo, scan, or PDF) into md / txt / docx / pdf |
+| **convert**    | extract a born-digital PDF / Word / PowerPoint to Markdown or plain text (no model) |
 
-Which model each tool uses is defined once in [`core/models.json`](core/models.json) —
-see [Shared model mapper](#shared-model-mapper).
+Which model the `translate` / `transcribe` tools use is defined once in
+[`core/models.json`](core/models.json) — see [Shared model mapper](#shared-model-mapper).
+`convert` calls no model.
 
 ## Layout
 
@@ -19,10 +22,13 @@ core/           shared internals: model mapper (modelmap.py + models.json),
                 Ollama client (ollama.py), helpers (pages.py), bundled font
 translate/      PDF translate pipeline: extract -> translate -> rebuild -> render_qa
 transcribe/     handwriting pipeline:    ingest  -> transcribe -> assemble -> render
+convert/        offline conversions (no model): pdf/docx/pptx -> md/txt
 tests/          pytest suite (runs without Ollama; model calls are mocked)
 ```
 
-Each tool is a package exposing one `pipeline()` function that the TUI and tests call.
+`translate` and `transcribe` are packages exposing one `pipeline()` function that the TUI
+and tests call. `convert` is a set of small per-format scripts, each a pure
+`name(in_path) -> str` function sharing `convert/common.py`.
 
 ## Setup
 
@@ -55,6 +61,7 @@ FileHandlingTools
 =================
  1) translate    translate a PDF, keep layout
  2) transcribe   handwritten notes -> md/txt/docx/pdf
+ 3) convert      pdf/docx/pptx -> md/txt
  0) quit
 
 Select a tool [1]: 2
@@ -65,15 +72,27 @@ Select a tool [1]: 2
   wrote: output/notes.md, output/notes.docx, output/notes.pdf
 ```
 
+`convert` infers the source type from the file extension and writes the result next to the
+input (e.g. `report.pdf` → `report.md`):
+
+```
+Select a tool [1]: 3
+  input file (pdf/docx/pptx): report.pdf
+  format (md/txt) [md]: md
+  wrote: report.md
+```
+
 ### Scripting (optional)
 
 Each tool is also a plain importable function, so you can drive it from Python:
 
 ```python
 import translate, transcribe
+from convert.pdf_to_md import pdf_to_md
 
 translate.pipeline("paper.pdf", tgt="no")                       # -> output/paper.no.pdf
 transcribe.pipeline("notes.jpg", formats=["md", "docx", "pdf"], cleanup=True)
+md = pdf_to_md("report.pdf")                                    # returns Markdown as a string
 ```
 
 ---
@@ -134,6 +153,48 @@ reconstructed as a clean linear document, not a pixel-faithful copy.
 
 ---
 
+## convert
+
+Extract a document's existing text into LLM-friendly Markdown or plain text — **offline, with
+no model**. This is the cheap extraction path: it reads what the file already contains and
+writes it out, so the result can be fed to an LLM (summaries, Q&A, RAG) or read directly.
+
+Four single-purpose scripts, each a pure `name(in_path) -> str` function:
+
+| Script | Conversion | Tool |
+|--------|------------|------|
+| `convert/pdf_to_md.py`  | PDF → Markdown    | `pymupdf4llm` (keeps headings/tables/reading order) |
+| `convert/pdf_to_txt.py` | PDF → plain text  | PyMuPDF `get_text` |
+| `convert/docx_to_md.py` | Word `.docx` → Markdown | `markitdown` |
+| `convert/pptx_to_md.py` | PowerPoint `.pptx` → Markdown | `markitdown` |
+
+Run a script directly (writes a sibling file by default; `-o` overrides; multiple inputs are
+allowed):
+
+```powershell
+uv run python convert/pdf_to_md.py report.pdf            # -> report.md
+uv run python convert/pdf_to_txt.py a.pdf b.pdf          # -> a.txt, b.txt
+uv run python convert/docx_to_md.py notes.docx -o out.md
+```
+
+Or call the function (returns the converted text as a string):
+
+```python
+from convert.pptx_to_md import pptx_to_md
+md = pptx_to_md("deck.pptx")
+```
+
+**Note on offline ≠ no-LLM-limit:** convert never calls an LLM, so any size document converts
+fine. But it does **not** remove a downstream LLM's context window — feeding a very long result
+into a single prompt still hits that limit. Chunk the output (per section/page) for long docs.
+
+**Limitations:** born-digital input only — scanned/image-only PDFs have no text layer, so use
+**transcribe** (OCR/VLM) for those. No page-range selection. The Office path pulls
+`markitdown` (which bundles a local ML file-type classifier, `onnxruntime` — offline, but a
+heavy dependency).
+
+---
+
 ## Shared model mapper
 
 `core/models.json` is the single source of truth for which Ollama model each tool/role
@@ -158,4 +219,5 @@ uv run pytest -q
 
 The suite runs without Ollama (the model calls are mocked).
 
-See `docs/specs/` and `docs/plans/` for the original `translate` design and implementation plan.
+See `docs/specs/` and `docs/plans/` for per-feature design specs and implementation plans
+(the original `translate` work and the `convert` tools).
