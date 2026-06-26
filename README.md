@@ -219,6 +219,22 @@ explicit `model=` argument to `pipeline()` overrides it).
 Override without editing the file via an env var, e.g.
 `OLLAMA_MODEL_TRANSCRIBE_TRANSCRIBE=moondream`.
 
+### Custom LLM endpoint (OpenAI-compatible)
+
+By default the tools call a local Ollama server (`core/ollama.py`). For pointing at a
+server that speaks the OpenAI API (`/v1/chat/completions`) — LM Studio, llama.cpp's
+server, vLLM, Jan, or Ollama's own `/v1` endpoint — there is an optional, drop-in client
+at [`core/openai_compat.py`](core/openai_compat.py). It mirrors `core.ollama.chat`
+(including a vision helper) and is configured via env vars:
+
+```powershell
+$env:OPENAI_BASE_URL = "http://localhost:1234/v1"   # default: http://localhost:11434/v1
+$env:OPENAI_API_KEY  = "sk-..."                      # optional; omit for local servers
+```
+
+It is not wired into the pipelines yet — to use it, inject it as the tool's callable
+(e.g. pass a `translator` / `transcriber` to `pipeline()` that calls `openai_compat.chat`).
+
 ## Tests
 
 ```powershell

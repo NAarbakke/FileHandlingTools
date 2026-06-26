@@ -49,7 +49,12 @@ tools/        the three tools, each a package:
   `model=` passed to `pipeline()` overrides everything.
   (Note: some docstrings/comments say "repo-root models.json" — stale; it lives in `core/`.)
 - `ollama.chat(model, messages, ...)` — the one raw-HTTP call to `localhost:11434/api/chat`.
-  Vision transcription passes base64 PNGs in a message's `images` field.
+  Vision transcription passes base64 PNGs in a message's `images` field. This is the
+  default client every tool uses.
+- `openai_compat.chat(...)` — optional, NOT wired in. A drop-in OpenAI-compatible client
+  (`/v1/chat/completions`, env vars `OPENAI_BASE_URL` / `OPENAI_API_KEY`, plus an
+  `image_message()` vision helper) for pointing at LM Studio / llama.cpp / vLLM / etc.
+  Inject it as a tool's callable to use it; `ollama.py` remains the default.
 - `pages.parse_pages("1-5,8")` — shared 1-based-spec → set of 0-based indices.
 - `assets/DejaVuSans.ttf` — the single embedded font used when rebuilding PDFs.
 
